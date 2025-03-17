@@ -1,43 +1,11 @@
-import os
-import sys
 import streamlit as st
 import pandas as pd
 import numpy as np
 import re
-
-# Check if required packages are available and install if not
-REQUIRED_PACKAGES = {
-    'plotly': 'plotly',
-    'scipy': 'scipy'
-}
-
-MISSING_PACKAGES = []
-
-for package, import_name in REQUIRED_PACKAGES.items():
-    try:
-        __import__(import_name)
-    except ImportError:
-        MISSING_PACKAGES.append(package)
-
-if MISSING_PACKAGES:
-    st.error(f"Missing required packages: {', '.join(MISSING_PACKAGES)}")
-    st.info("""
-    Please run the following command to install the required packages:
-    ```
-    pip install -r requirements.txt
-    ```
-    Or run the install_dependencies.sh script:
-    ```
-    bash install_dependencies.sh
-    ```
-    Then restart this app.
-    """)
-    st.stop()
-
-# Now that we've confirmed packages are installed, import them
-import plotly.express as px
-import plotly.graph_objects as go
-from scipy import stats
+import sys
+import subprocess
+import importlib.util
+import os
 
 # Set page configuration
 st.set_page_config(
@@ -53,19 +21,74 @@ Upload your CSV or Excel file and get an automatically generated dashboard with 
 The app intelligently analyzes your data and selects the best visualization types based on the content.
 """)
 
-# Display package installation status
-with st.expander("📦 Package Installation Status"):
-    for package_status in installed_packages:
-        st.markdown(package_status)
-    
-    if any("installation failed" in status for status in installed_packages):
-        st.warning("""
-        Some packages failed to install automatically. If you encounter errors, try manually installing them with:
-        ```
-        pip install streamlit pandas numpy plotly scipy
-        ```
-        """)
+# Function to check if a package is installed
+def is_package_installed(package_name):
+    return importlib.util.find_spec(package_name) is not None
 
+# Function to try installing a package using pip
+def try_install_package(package):
+    try:
+        # Use pip in user mode to avoid permission issues
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", package])
+        return True
+    except:
+        return False
+
+# Check for required packages
+required_packages = {
+    'plotly': 'plotly==5.20.0',
+    'scipy': 'scipy==1.12.0',
+}
+
+# Count existing and missing packages
+missing_packages = []
+for package_name, package_spec in required_packages.items():
+    if not is_package_installed(package_name):
+        missing_packages.append(package_spec)
+
+# Try to auto-install if there are missing packages
+if missing_packages:
+    with st.spinner("🔄 Installing required packages... This may take a moment."):
+        success = False
+        for package in missing_packages:
+            if try_install_package(package):
+                st.success(f"✅ Successfully installed {package}")
+                success = True
+            else:
+                st.error(f"❌ Failed to install {package}")
+                
+        if success:
+            st.info("🔄 Reloading the app to use the newly installed packages...")
+            st.experimental_rerun()
+        else:
+            st.warning("⚠️ Could not automatically install required packages. Some features will be limited.")
+
+# Now try to import the packages
+try:
+    import plotly.express as px
+    import plotly.graph_objects as go
+    PLOTLY_AVAILABLE = True
+except ImportError:
+    PLOTLY_AVAILABLE = False
+    st.warning("⚠️ Plotly is not available. Visualizations will be limited.")
+
+try:
+    from scipy import stats
+    SCIPY_AVAILABLE = True
+except ImportError:
+    SCIPY_AVAILABLE = False
+    st.warning("⚠️ SciPy is not available. Statistical analysis will be limited.")
+
+# Stop the app if plotly is not available as it's essential for visualizations
+if not PLOTLY_AVAILABLE:
+    st.error("❌ Plotly is required for visualizations. The app cannot function properly without it.")
+    st.markdown("""
+    ### Possible solutions:
+    1. Contact your Streamlit admin to install the required packages
+    2. Deploy this app in an environment with the necessary dependencies
+    3. Use a Streamlit Community Cloud account where you can specify requirements.txt
+    """)
+    st.stop()
 
 # Function to detect column data types and semantics
 def analyze_column(df, column_name):
@@ -130,13 +153,30 @@ def analyze_column(df, column_name):
         elif "price" in col_semantic or "quantity" in col_semantic:
             # Check distribution skew
             if len(col_data) > 10:
-                skewness = stats.skew(col_data)
-                if abs(skewness) > 1.5:
-                    viz_type = "box_plot"
-                    description = f"Skewed numeric data (skew: {skewness:.2f}), box plot shows distribution with outliers"
+                if SCIPY_AVAILABLE:
+                    skewness = stats.skew(col_data)
+                    if abs(skewness) > 1.5:
+                        viz_type = "box_plot"
+                        description = f"Skewed numeric data (skew: {skewness:.2f}), box plot shows distribution with outliers"
+                    else:
+                        viz_type = "histogram"
+                        description = "Numeric data with relatively normal distribution"
                 else:
-                    viz_type = "histogram"
-                    description = "Numeric data with relatively normal distribution"
+                    # Simple skewness approximation without scipy
+                    median = col_data.median()
+                    mean = col_data.mean()
+                    std = col_data.std()
+                    if std == 0:
+                        simple_skew = 0
+                    else:
+                        simple_skew = 3 * (mean - median) / std
+                    
+                    if abs(simple_skew) > 1:
+                        viz_type = "box_plot"
+                        description = "Likely skewed numeric data, box plot shows distribution with outliers"
+                    else:
+                        viz_type = "histogram"
+                        description = "Numeric data with relatively normal distribution"
             else:
                 viz_type = "bar_chart"
                 description = "Small set of numeric values"
@@ -292,7 +332,7 @@ def create_visualization(df, column_name, analysis, key_suffix=""):
         
         # Show basic statistics
         with st.expander("See statistics with outliers"):
-            # Calculate IQR and outlier boundaries (without using scipy)
+            # Calculate IQR and outlier boundaries
             Q1 = col_data.quantile(0.25)
             Q3 = col_data.quantile(0.75)
             IQR = Q3 - Q1
@@ -599,28 +639,25 @@ def create_recommended_visualization(df, recommendation):
             st.dataframe(grouped_data)
             
         # Show ANOVA test results if there are multiple categories
-        if len(grouped_data) > 1:
+        if len(grouped_data) > 1 and SCIPY_AVAILABLE:
             with st.expander("Statistical significance"):
-                if STATS_AVAILABLE:
-                    try:
-                        # Create groups for ANOVA
-                        groups = [df[df[cat_col] == category][num_col].dropna() 
-                                for category in grouped_data[cat_col]]
-                        
-                        # Run ANOVA
-                        f_stat, p_value = stats.f_oneway(*groups)
-                        
-                        st.write(f"ANOVA F-statistic: {f_stat:.3f}")
-                        st.write(f"p-value: {p_value:.5f}")
-                        
-                        if p_value < 0.05:
-                            st.write("The differences between groups are statistically significant (p < 0.05).")
-                        else:
-                            st.write("The differences between groups are not statistically significant (p ≥ 0.05).")
-                    except:
-                        st.write("Could not perform statistical test on this data.")
-                else:
-                    st.write("Statistical tests unavailable (scipy not installed).")
+                try:
+                    # Create groups for ANOVA
+                    groups = [df[df[cat_col] == category][num_col].dropna() 
+                            for category in grouped_data[cat_col]]
+                    
+                    # Run ANOVA
+                    f_stat, p_value = stats.f_oneway(*groups)
+                    
+                    st.write(f"ANOVA F-statistic: {f_stat:.3f}")
+                    st.write(f"p-value: {p_value:.5f}")
+                    
+                    if p_value < 0.05:
+                        st.write("The differences between groups are statistically significant (p < 0.05).")
+                    else:
+                        st.write("The differences between groups are not statistically significant (p ≥ 0.05).")
+                except:
+                    st.write("Could not perform statistical test on this data.")
     
     elif viz_type == "time_series_by_category":
         time_col, cat_col = columns
@@ -691,6 +728,30 @@ def create_recommended_visualization(df, recommendation):
         fig.update_traces(diagonal_visible=False)
         st.plotly_chart(fig, use_container_width=True)
 
+# Main app logic
+def main():
+    # File upload
+    uploaded_file = st.file_uploader("Upload your dataset (CSV or Excel)", type=['csv', 'xlsx', 'xls'])
+    
+    if uploaded_file is not None:
+        # Load data
+        try:
+            # Check file type
+            if uploaded_file.name.endswith('.csv'):
+                df = pd.read_csv(uploaded_file)
+            else:
+                df = pd.read_excel(uploaded_file)
+            
+            # Display basic dataset info
+            st.subheader("📋 Dataset Overview")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Rows", df.shape[0])
+            with col2:
+                st.metric("Columns", df.shape[1])
+            with col3:
+                st.metric("Missing Values", df
+                          
 # Main app logic
 def main():
     # File upload
