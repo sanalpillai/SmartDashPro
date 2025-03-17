@@ -751,30 +751,6 @@ def main():
             with col2:
                 st.metric("Columns", df.shape[1])
             with col3:
-                st.metric("Missing Values", df
-                          
-# Main app logic
-def main():
-    # File upload
-    uploaded_file = st.file_uploader("Upload your dataset (CSV or Excel)", type=['csv', 'xlsx', 'xls'])
-    
-    if uploaded_file is not None:
-        # Load data
-        try:
-            # Check file type
-            if uploaded_file.name.endswith('.csv'):
-                df = pd.read_csv(uploaded_file)
-            else:
-                df = pd.read_excel(uploaded_file)
-            
-            # Display basic dataset info
-            st.subheader("📋 Dataset Overview")
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric("Rows", df.shape[0])
-            with col2:
-                st.metric("Columns", df.shape[1])
-            with col3:
                 st.metric("Missing Values", df.isna().sum().sum())
             
             # Display data sample
