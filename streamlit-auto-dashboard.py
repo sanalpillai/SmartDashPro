@@ -2,10 +2,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import re
-import sys
-import subprocess
-import importlib.util
-import os
 
 # Set page configuration
 st.set_page_config(
@@ -21,74 +17,14 @@ Upload your CSV or Excel file and get an automatically generated dashboard with 
 The app intelligently analyzes your data and selects the best visualization types based on the content.
 """)
 
-# Function to check if a package is installed
-def is_package_installed(package_name):
-    return importlib.util.find_spec(package_name) is not None
-
-# Function to try installing a package using pip
-def try_install_package(package):
-    try:
-        # Use pip in user mode to avoid permission issues
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", package])
-        return True
-    except:
-        return False
-
-# Check for required packages
-required_packages = {
-    'plotly': 'plotly==5.20.0',
-    'scipy': 'scipy==1.12.0',
-}
-
-# Count existing and missing packages
-missing_packages = []
-for package_name, package_spec in required_packages.items():
-    if not is_package_installed(package_name):
-        missing_packages.append(package_spec)
-
-# Try to auto-install if there are missing packages
-if missing_packages:
-    with st.spinner("🔄 Installing required packages... This may take a moment."):
-        success = False
-        for package in missing_packages:
-            if try_install_package(package):
-                st.success(f"✅ Successfully installed {package}")
-                success = True
-            else:
-                st.error(f"❌ Failed to install {package}")
-                
-        if success:
-            st.info("🔄 Reloading the app to use the newly installed packages...")
-            st.experimental_rerun()
-        else:
-            st.warning("⚠️ Could not automatically install required packages. Some features will be limited.")
-
-# Now try to import the packages
+# Check for Plotly availability - we'll use Streamlit's built-in charts if not available
 try:
     import plotly.express as px
     import plotly.graph_objects as go
     PLOTLY_AVAILABLE = True
 except ImportError:
     PLOTLY_AVAILABLE = False
-    st.warning("⚠️ Plotly is not available. Visualizations will be limited.")
-
-try:
-    from scipy import stats
-    SCIPY_AVAILABLE = True
-except ImportError:
-    SCIPY_AVAILABLE = False
-    st.warning("⚠️ SciPy is not available. Statistical analysis will be limited.")
-
-# Stop the app if plotly is not available as it's essential for visualizations
-if not PLOTLY_AVAILABLE:
-    st.error("❌ Plotly is required for visualizations. The app cannot function properly without it.")
-    st.markdown("""
-    ### Possible solutions:
-    1. Contact your Streamlit admin to install the required packages
-    2. Deploy this app in an environment with the necessary dependencies
-    3. Use a Streamlit Community Cloud account where you can specify requirements.txt
-    """)
-    st.stop()
+    st.info("📌 Using Streamlit's built-in charts. For more advanced visualizations, add plotly to your requirements.")
 
 # Function to detect column data types and semantics
 def analyze_column(df, column_name):
