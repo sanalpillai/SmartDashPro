@@ -1,12 +1,41 @@
+import subprocess
+import sys
+import time
+
+# Function to install missing packages
+def install_package(package):
+    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+    
+# Check and install required packages
+required_packages = ['streamlit', 'pandas', 'numpy', 'plotly', 'scipy']
+installed_packages = []
+
+for package in required_packages:
+    try:
+        __import__(package)
+        installed_packages.append(f"✅ {package}")
+    except ImportError:
+        print(f"Installing {package}...")
+        try:
+            install_package(package)
+            installed_packages.append(f"✅ {package} (newly installed)")
+        except:
+            installed_packages.append(f"❌ {package} (installation failed)")
+
+# Import required packages after installation
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 import plotly.express as px
 import plotly.graph_objects as go
-from scipy import stats
 import re
+
+# Import optional packages with fallback
+try:
+    from scipy import stats
+    STATS_AVAILABLE = True
+except ImportError:
+    STATS_AVAILABLE = False
 
 # Set page configuration
 st.set_page_config(
@@ -21,6 +50,20 @@ st.markdown("""
 Upload your CSV or Excel file and get an automatically generated dashboard with appropriate visualizations for your data!
 The app intelligently analyzes your data and selects the best visualization types based on the content.
 """)
+
+# Display package installation status
+with st.expander("📦 Package Installation Status"):
+    for package_status in installed_packages:
+        st.markdown(package_status)
+    
+    if any("installation failed" in status for status in installed_packages):
+        st.warning("""
+        Some packages failed to install automatically. If you encounter errors, try manually installing them with:
+        ```
+        pip install streamlit pandas numpy plotly scipy
+        ```
+        """)
+
 
 # Function to detect column data types and semantics
 def analyze_column(df, column_name):
@@ -247,7 +290,7 @@ def create_visualization(df, column_name, analysis, key_suffix=""):
         
         # Show basic statistics
         with st.expander("See statistics with outliers"):
-            # Calculate IQR and outlier boundaries
+            # Calculate IQR and outlier boundaries (without using scipy)
             Q1 = col_data.quantile(0.25)
             Q3 = col_data.quantile(0.75)
             IQR = Q3 - Q1
@@ -556,23 +599,26 @@ def create_recommended_visualization(df, recommendation):
         # Show ANOVA test results if there are multiple categories
         if len(grouped_data) > 1:
             with st.expander("Statistical significance"):
-                try:
-                    # Create groups for ANOVA
-                    groups = [df[df[cat_col] == category][num_col].dropna() 
-                             for category in grouped_data[cat_col]]
-                    
-                    # Run ANOVA
-                    f_stat, p_value = stats.f_oneway(*groups)
-                    
-                    st.write(f"ANOVA F-statistic: {f_stat:.3f}")
-                    st.write(f"p-value: {p_value:.5f}")
-                    
-                    if p_value < 0.05:
-                        st.write("The differences between groups are statistically significant (p < 0.05).")
-                    else:
-                        st.write("The differences between groups are not statistically significant (p ≥ 0.05).")
-                except:
-                    st.write("Could not perform statistical test on this data.")
+                if STATS_AVAILABLE:
+                    try:
+                        # Create groups for ANOVA
+                        groups = [df[df[cat_col] == category][num_col].dropna() 
+                                for category in grouped_data[cat_col]]
+                        
+                        # Run ANOVA
+                        f_stat, p_value = stats.f_oneway(*groups)
+                        
+                        st.write(f"ANOVA F-statistic: {f_stat:.3f}")
+                        st.write(f"p-value: {p_value:.5f}")
+                        
+                        if p_value < 0.05:
+                            st.write("The differences between groups are statistically significant (p < 0.05).")
+                        else:
+                            st.write("The differences between groups are not statistically significant (p ≥ 0.05).")
+                    except:
+                        st.write("Could not perform statistical test on this data.")
+                else:
+                    st.write("Statistical tests unavailable (scipy not installed).")
     
     elif viz_type == "time_series_by_category":
         time_col, cat_col = columns
