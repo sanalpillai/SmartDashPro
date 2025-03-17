@@ -1,41 +1,43 @@
-import subprocess
+import os
 import sys
-import time
-
-# Function to install missing packages
-def install_package(package):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
-    
-# Check and install required packages
-required_packages = ['streamlit', 'pandas', 'numpy', 'plotly', 'scipy']
-installed_packages = []
-
-for package in required_packages:
-    try:
-        __import__(package)
-        installed_packages.append(f"✅ {package}")
-    except ImportError:
-        print(f"Installing {package}...")
-        try:
-            install_package(package)
-            installed_packages.append(f"✅ {package} (newly installed)")
-        except:
-            installed_packages.append(f"❌ {package} (installation failed)")
-
-# Import required packages after installation
 import streamlit as st
 import pandas as pd
 import numpy as np
-import plotly.express as px
-import plotly.graph_objects as go
 import re
 
-# Import optional packages with fallback
-try:
-    from scipy import stats
-    STATS_AVAILABLE = True
-except ImportError:
-    STATS_AVAILABLE = False
+# Check if required packages are available and install if not
+REQUIRED_PACKAGES = {
+    'plotly': 'plotly',
+    'scipy': 'scipy'
+}
+
+MISSING_PACKAGES = []
+
+for package, import_name in REQUIRED_PACKAGES.items():
+    try:
+        __import__(import_name)
+    except ImportError:
+        MISSING_PACKAGES.append(package)
+
+if MISSING_PACKAGES:
+    st.error(f"Missing required packages: {', '.join(MISSING_PACKAGES)}")
+    st.info("""
+    Please run the following command to install the required packages:
+    ```
+    pip install -r requirements.txt
+    ```
+    Or run the install_dependencies.sh script:
+    ```
+    bash install_dependencies.sh
+    ```
+    Then restart this app.
+    """)
+    st.stop()
+
+# Now that we've confirmed packages are installed, import them
+import plotly.express as px
+import plotly.graph_objects as go
+from scipy import stats
 
 # Set page configuration
 st.set_page_config(
