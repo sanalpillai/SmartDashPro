@@ -754,13 +754,15 @@ def recommend_related_visualizations(df, column_analyses):
     return recommendations
 
 # Function to create enhanced recommended visualizations
-def create_enhanced_recommendation(df, recommendation):
+def create_enhanced_recommendation(df, recommendation, key_id=None):
     """Creates an enhanced visualization based on a recommendation"""
     viz_type = recommendation["type"]
     columns = recommendation["columns"]
     
     # Generate a unique key for this recommendation
-    rec_key = f"rec_{viz_type}_{'_'.join(columns)}"
+    import uuid
+    rec_key = f"rec_{viz_type}_{'_'.join([col[:5] for col in columns])}_{uuid.uuid4().hex[:6]}"
+
     
     if viz_type == "grouped_bar":
         num_col, cat_col = columns
@@ -1487,6 +1489,9 @@ def main():
                         
                         # Display recommendations in a grid
                         for i, recommendation in enumerate(recommendations[:6]):  # Limit to 6 recommendations
+                            # Create a unique key for each recommendation
+                            rec_id = f"rec_{i}_{uuid.uuid4().hex[:6]}"
+                            create_enhanced_recommendation(df, recommendation, key_id=rec_id)
                             st.markdown("<div class='card'>", unsafe_allow_html=True)
                             st.markdown(f"""
                             <div class='recommendation-card'>
