@@ -7,51 +7,113 @@ import importlib.util
 import os
 import uuid
 
-# Define color schemes for each theme
-theme_colors = {
-    "Default": {
-        "primary": "#4e8df5",
-        "secondary": "#f5f7f9",
-        "text": "#2e4057",
-        "chart_colors": px.colors.qualitative.Plotly,
-        "gradient": px.colors.sequential.Blues
-    },
-    "Blue": {
-        "primary": "#1f77b4",
-        "secondary": "#e6f2ff",
-        "text": "#0d3c61",
-        "chart_colors": px.colors.sequential.Blues,
-        "gradient": px.colors.sequential.Blues
-    },
-    "Green": {
-        "primary": "#2ca02c",
-        "secondary": "#e6f7e6",
-        "text": "#0d610d",
-        "chart_colors": px.colors.sequential.Greens,
-        "gradient": px.colors.sequential.Greens
-    },
-    "Red": {
-        "primary": "#d62728",
-        "secondary": "#ffe6e6",
-        "text": "#61130d",
-        "chart_colors": px.colors.sequential.Reds,
-        "gradient": px.colors.sequential.Reds
-    },
-    "Purple": {
-        "primary": "#9467bd",
-        "secondary": "#f0e6ff",
-        "text": "#3e1461",
-        "chart_colors": px.colors.sequential.Purples,
-        "gradient": px.colors.sequential.Purples
-    },
-    "Dark": {
-        "primary": "#1e1e1e",
-        "secondary": "#2e2e2e",
-        "text": "#ffffff",
-        "chart_colors": px.colors.qualitative.Dark24,
-        "gradient": px.colors.sequential.Greys_r
+# Check for required packages FIRST
+try:
+    import plotly.express as px
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+    PLOTLY_AVAILABLE = True
+except ImportError:
+    PLOTLY_AVAILABLE = False
+
+try:
+    from scipy import stats
+    SCIPY_AVAILABLE = True
+except ImportError:
+    SCIPY_AVAILABLE = False
+
+# THEN define color schemes for each theme AFTER importing plotly
+if PLOTLY_AVAILABLE:
+    theme_colors = {
+        "Default": {
+            "primary": "#4e8df5",
+            "secondary": "#f5f7f9",
+            "text": "#2e4057",
+            "chart_colors": px.colors.qualitative.Plotly,
+            "gradient": px.colors.sequential.Blues
+        },
+        "Blue": {
+            "primary": "#1f77b4",
+            "secondary": "#e6f2ff",
+            "text": "#0d3c61",
+            "chart_colors": px.colors.sequential.Blues,
+            "gradient": px.colors.sequential.Blues
+        },
+        "Green": {
+            "primary": "#2ca02c",
+            "secondary": "#e6f7e6",
+            "text": "#0d610d",
+            "chart_colors": px.colors.sequential.Greens,
+            "gradient": px.colors.sequential.Greens
+        },
+        "Red": {
+            "primary": "#d62728",
+            "secondary": "#ffe6e6",
+            "text": "#61130d",
+            "chart_colors": px.colors.sequential.Reds,
+            "gradient": px.colors.sequential.Reds
+        },
+        "Purple": {
+            "primary": "#9467bd",
+            "secondary": "#f0e6ff",
+            "text": "#3e1461",
+            "chart_colors": px.colors.sequential.Purples,
+            "gradient": px.colors.sequential.Purples
+        },
+        "Dark": {
+            "primary": "#1e1e1e",
+            "secondary": "#2e2e2e",
+            "text": "#ffffff",
+            "chart_colors": px.colors.qualitative.Dark24,
+            "gradient": px.colors.sequential.Greys_r
+        }
     }
-}
+else:
+    # Fallback if plotly is not available
+    theme_colors = {
+        "Default": {
+            "primary": "#4e8df5",
+            "secondary": "#f5f7f9",
+            "text": "#2e4057",
+            "chart_colors": ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd"],
+            "gradient": ["#f7fbff", "#deebf7", "#c6dbef", "#9ecae1", "#6baed6"]
+        },
+        "Blue": {
+            "primary": "#1f77b4",
+            "secondary": "#e6f2ff",
+            "text": "#0d3c61",
+            "chart_colors": ["#1f77b4", "#6baed6", "#9ecae1", "#c6dbef", "#deebf7"],
+            "gradient": ["#08306b", "#08519c", "#2171b5", "#4292c6", "#6baed6"]
+        },
+        "Green": {
+            "primary": "#2ca02c",
+            "secondary": "#e6f7e6",
+            "text": "#0d610d",
+            "chart_colors": ["#2ca02c", "#74c476", "#a1d99b", "#c7e9c0", "#e5f5e0"],
+            "gradient": ["#00441b", "#006d2c", "#238b45", "#41ab5d", "#74c476"]
+        },
+        "Red": {
+            "primary": "#d62728",
+            "secondary": "#ffe6e6",
+            "text": "#61130d",
+            "chart_colors": ["#d62728", "#fc9272", "#fcbba1", "#fee0d2", "#fff5f0"],
+            "gradient": ["#67000d", "#a50f15", "#cb181d", "#ef3b2c", "#fb6a4a"]
+        },
+        "Purple": {
+            "primary": "#9467bd",
+            "secondary": "#f0e6ff",
+            "text": "#3e1461",
+            "chart_colors": ["#9467bd", "#bcbddc", "#dadaeb", "#e6e5ef", "#f2f0f7"],
+            "gradient": ["#3f007d", "#54278f", "#6a51a3", "#807dba", "#9e9ac8"]
+        },
+        "Dark": {
+            "primary": "#1e1e1e",
+            "secondary": "#2e2e2e",
+            "text": "#ffffff",
+            "chart_colors": ["#1e1e1e", "#333333", "#555555", "#777777", "#999999"],
+            "gradient": ["#000000", "#252525", "#525252", "#737373", "#969696"]
+        }
+    }
 
 # Set page configuration
 st.set_page_config(
@@ -139,21 +201,6 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-
-# Check for required packages
-try:
-    import plotly.express as px
-    import plotly.graph_objects as go
-    from plotly.subplots import make_subplots
-    PLOTLY_AVAILABLE = True
-except ImportError:
-    PLOTLY_AVAILABLE = False
-
-try:
-    from scipy import stats
-    SCIPY_AVAILABLE = True
-except ImportError:
-    SCIPY_AVAILABLE = False
 
 # Dashboard header
 st.markdown('<h1 style="text-align: center; color: #2e4057;">Smart Data Dashboard</h1>', unsafe_allow_html=True)
