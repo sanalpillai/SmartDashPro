@@ -7,114 +7,6 @@ import importlib.util
 import os
 import uuid
 
-# Check for required packages FIRST
-try:
-    import plotly.express as px
-    import plotly.graph_objects as go
-    from plotly.subplots import make_subplots
-    PLOTLY_AVAILABLE = True
-except ImportError:
-    PLOTLY_AVAILABLE = False
-
-try:
-    from scipy import stats
-    SCIPY_AVAILABLE = True
-except ImportError:
-    SCIPY_AVAILABLE = False
-
-# THEN define color schemes for each theme AFTER importing plotly
-if PLOTLY_AVAILABLE:
-    theme_colors = {
-        "Default": {
-            "primary": "#4e8df5",
-            "secondary": "#f5f7f9",
-            "text": "#2e4057",
-            "chart_colors": px.colors.qualitative.Plotly,
-            "gradient": px.colors.sequential.Blues
-        },
-        "Blue": {
-            "primary": "#1f77b4",
-            "secondary": "#e6f2ff",
-            "text": "#0d3c61",
-            "chart_colors": px.colors.sequential.Blues,
-            "gradient": px.colors.sequential.Blues
-        },
-        "Green": {
-            "primary": "#2ca02c",
-            "secondary": "#e6f7e6",
-            "text": "#0d610d",
-            "chart_colors": px.colors.sequential.Greens,
-            "gradient": px.colors.sequential.Greens
-        },
-        "Red": {
-            "primary": "#d62728",
-            "secondary": "#ffe6e6",
-            "text": "#61130d",
-            "chart_colors": px.colors.sequential.Reds,
-            "gradient": px.colors.sequential.Reds
-        },
-        "Purple": {
-            "primary": "#9467bd",
-            "secondary": "#f0e6ff",
-            "text": "#3e1461",
-            "chart_colors": px.colors.sequential.Purples,
-            "gradient": px.colors.sequential.Purples
-        },
-        "Dark": {
-            "primary": "#1e1e1e",
-            "secondary": "#2e2e2e",
-            "text": "#ffffff",
-            "chart_colors": px.colors.qualitative.Dark24,
-            "gradient": px.colors.sequential.Greys_r
-        }
-    }
-else:
-    # Fallback if plotly is not available
-    theme_colors = {
-        "Default": {
-            "primary": "#4e8df5",
-            "secondary": "#f5f7f9",
-            "text": "#2e4057",
-            "chart_colors": ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd"],
-            "gradient": ["#f7fbff", "#deebf7", "#c6dbef", "#9ecae1", "#6baed6"]
-        },
-        "Blue": {
-            "primary": "#1f77b4",
-            "secondary": "#e6f2ff",
-            "text": "#0d3c61",
-            "chart_colors": ["#1f77b4", "#6baed6", "#9ecae1", "#c6dbef", "#deebf7"],
-            "gradient": ["#08306b", "#08519c", "#2171b5", "#4292c6", "#6baed6"]
-        },
-        "Green": {
-            "primary": "#2ca02c",
-            "secondary": "#e6f7e6",
-            "text": "#0d610d",
-            "chart_colors": ["#2ca02c", "#74c476", "#a1d99b", "#c7e9c0", "#e5f5e0"],
-            "gradient": ["#00441b", "#006d2c", "#238b45", "#41ab5d", "#74c476"]
-        },
-        "Red": {
-            "primary": "#d62728",
-            "secondary": "#ffe6e6",
-            "text": "#61130d",
-            "chart_colors": ["#d62728", "#fc9272", "#fcbba1", "#fee0d2", "#fff5f0"],
-            "gradient": ["#67000d", "#a50f15", "#cb181d", "#ef3b2c", "#fb6a4a"]
-        },
-        "Purple": {
-            "primary": "#9467bd",
-            "secondary": "#f0e6ff",
-            "text": "#3e1461",
-            "chart_colors": ["#9467bd", "#bcbddc", "#dadaeb", "#e6e5ef", "#f2f0f7"],
-            "gradient": ["#3f007d", "#54278f", "#6a51a3", "#807dba", "#9e9ac8"]
-        },
-        "Dark": {
-            "primary": "#1e1e1e",
-            "secondary": "#2e2e2e",
-            "text": "#ffffff",
-            "chart_colors": ["#1e1e1e", "#333333", "#555555", "#777777", "#999999"],
-            "gradient": ["#000000", "#252525", "#525252", "#737373", "#969696"]
-        }
-    }
-
 # Set page configuration
 st.set_page_config(
     page_title="Smart Data Dashboard",
@@ -201,6 +93,21 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
+# Check for required packages
+try:
+    import plotly.express as px
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+    PLOTLY_AVAILABLE = True
+except ImportError:
+    PLOTLY_AVAILABLE = False
+
+try:
+    from scipy import stats
+    SCIPY_AVAILABLE = True
+except ImportError:
+    SCIPY_AVAILABLE = False
 
 # Dashboard header
 st.markdown('<h1 style="text-align: center; color: #2e4057;">Smart Data Dashboard</h1>', unsafe_allow_html=True)
@@ -353,22 +260,8 @@ def analyze_column(df, column_name):
     }
 
 # Function to create enhanced visualizations based on column analysis
-# Function signature:
-def create_enhanced_visualization(df, column_name, analysis, key_suffix="", theme=None):
-    # Use default theme if none provided
-    if theme is None:
-        theme = theme_colors["Default"]
-    
-    # Then update color references in your charts, for example:
-    fig = px.bar(
-        value_counts, 
-        x=column_name, 
-        y='Count',
-        title=title,
-        text='Count',
-        color_discrete_sequence=[theme['primary']],  # Use theme color
-        opacity=0.8
-    )
+def create_enhanced_visualization(df, column_name, analysis, key_suffix=""):
+    """Creates a better styled visualization based on column analysis"""
     
     if analysis["viz_type"] == "none":
         st.write(f"No visualization available for empty column: {column_name}")
@@ -1354,34 +1247,9 @@ def main():
         st.markdown("<h3 style='text-align: center;'>Dashboard Controls</h3>", unsafe_allow_html=True)
         
         # Theme selection
-        st.markdown("<div style='margin-top: 20px;'><b>Visual Theme</b></div>", unsafe_allow_html=True)
-        selected_theme = st.selectbox("Select color theme:", list(theme_colors.keys()), label_visibility="collapsed")
-        current_theme = theme_colors[selected_theme]
-        
-        # Apply theme through CSS
-        theme_css = f"""
-        <style>
-            .main {{
-                background-color: {current_theme['secondary']};
-            }}
-            .stTabs [aria-selected="true"] {{
-                background-color: {current_theme['primary']};
-            }}
-            h1, h2, h3 {{
-                color: {current_theme['text']};
-            }}
-            .metric-value {{
-                color: {current_theme['primary']};
-            }}
-            .card {{
-                border: 1px solid {current_theme['secondary']};
-            }}
-            .recommendation-card {{
-                border-left: 4px solid {current_theme['primary']};
-            }}
-        </style>
-        """
-        st.markdown(theme_css, unsafe_allow_html=True)
+        #st.markdown("<div style='margin-top: 20px;'><b>Visual Theme</b></div>", unsafe_allow_html=True)
+        #theme_options = ["Default", "Blue", "Green", "Red", "Purple", "Dark"]
+        #selected_theme = st.selectbox("Select color theme:", theme_options, label_visibility="collapsed")
         
         # Auto refresh toggle
         st.markdown("<div style='margin-top: 20px;'><b>Auto-Refresh</b></div>", unsafe_allow_html=True)
@@ -1585,7 +1453,7 @@ def main():
                         with viz_columns[i % 2]:
                             st.markdown(f"<div class='card'>", unsafe_allow_html=True)
                             analysis = column_analyses[column_name]
-                            create_enhanced_visualization(df, column_name, analysis, key_suffix=f"main_{i}", theme=current_theme)
+                            create_enhanced_visualization(df, column_name, analysis, key_suffix=f"main_{i}")
                             st.markdown("</div>", unsafe_allow_html=True)
                     
                     # Get recommendations
@@ -1623,7 +1491,7 @@ def main():
                         for i, recommendation in enumerate(recommendations[:6]):  # Limit to 6 recommendations
                             # Create a unique key for each recommendation
                             rec_id = f"rec_{i}_{uuid.uuid4().hex[:6]}"
-                            create_enhanced_recommendation(df, recommendation, key_id=f"main_insight_{uuid.uuid4().hex[:8]}", theme=current_theme)
+                            create_enhanced_recommendation(df, recommendation, key_id=rec_id)
                             st.markdown("<div class='card'>", unsafe_allow_html=True)
                             st.markdown(f"""
                             <div class='recommendation-card'>
