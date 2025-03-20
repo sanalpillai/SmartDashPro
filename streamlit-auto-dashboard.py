@@ -5,6 +5,7 @@ import re
 import sys
 import importlib.util
 import os
+import uuid
 
 # Set page configuration
 st.set_page_config(
@@ -760,8 +761,7 @@ def create_enhanced_recommendation(df, recommendation, key_id=None):
     columns = recommendation["columns"]
     
     # Generate a unique key for this recommendation
-    import uuid
-    rec_key = f"rec_{viz_type}_{'_'.join([col[:5] for col in columns])}_{uuid.uuid4().hex[:6]}"
+    rec_key = key_id or f"rec_{viz_type}_{uuid.uuid4().hex[:8]}"
 
     
     if viz_type == "grouped_bar":
