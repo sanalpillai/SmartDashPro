@@ -6,21 +6,6 @@ import sys
 import importlib.util
 import os
 
-# Check for required packages
-try:
-    import plotly.express as px
-    import plotly.graph_objects as go
-    from plotly.subplots import make_subplots
-    PLOTLY_AVAILABLE = True
-except ImportError:
-    PLOTLY_AVAILABLE = False
-
-try:
-    from scipy import stats
-    SCIPY_AVAILABLE = True
-except ImportError:
-    SCIPY_AVAILABLE = False
-
 # Set page configuration
 st.set_page_config(
     page_title="Smart Data Dashboard",
@@ -108,6 +93,21 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# Check for required packages
+try:
+    import plotly.express as px
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+    PLOTLY_AVAILABLE = True
+except ImportError:
+    PLOTLY_AVAILABLE = False
+
+try:
+    from scipy import stats
+    SCIPY_AVAILABLE = True
+except ImportError:
+    SCIPY_AVAILABLE = False
+
 # Dashboard header
 st.markdown('<h1 style="text-align: center; color: #2e4057;">Smart Data Dashboard</h1>', unsafe_allow_html=True)
 
@@ -118,7 +118,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Function to detect column data types and semantics (your existing function)
+# Function to detect column data types and semantics
 def analyze_column(df, column_name):
     """Analyzes a column to determine its properties and best visualization type"""
     col_data = df[column_name].dropna()
@@ -299,7 +299,8 @@ def create_enhanced_visualization(df, column_name, analysis, key_suffix=""):
             hovertemplate='<b>%{label}</b><br>Count: %{value}<br>Percentage: %{customdata[0]:.1f}%<extra></extra>'
         )
         fig.update_layout(**plot_layout)
-        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False}, 
+                      key=f"pie_{column_name}_{key_suffix}")
         
         # Show data table with counts and percentages
         with st.expander("See detailed data"):
@@ -356,7 +357,8 @@ def create_enhanced_visualization(df, column_name, analysis, key_suffix=""):
             yaxis=dict(title="Count", showgrid=True, gridwidth=1, gridcolor='rgba(211,211,211,0.3)')
         )
         
-        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False}, 
+                      key=f"bar_{column_name}_{key_suffix}")
         
         with st.expander("See detailed data"):
             st.dataframe(value_counts, use_container_width=True)
@@ -389,7 +391,8 @@ def create_enhanced_visualization(df, column_name, analysis, key_suffix=""):
             yaxis=dict(title="Frequency", showgrid=True, gridwidth=1, gridcolor='rgba(211,211,211,0.3)')
         )
         
-        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False}, 
+                      key=f"hist_{column_name}_{key_suffix}")
         
         # Show summary statistics
         with st.expander("See statistics"):
@@ -415,7 +418,8 @@ def create_enhanced_visualization(df, column_name, analysis, key_suffix=""):
             xaxis=dict(title="", showticklabels=False)
         )
         
-        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False}, 
+                      key=f"box_{column_name}_{key_suffix}")
         
         # Show outlier statistics
         Q1 = col_data.quantile(0.25)
@@ -499,7 +503,8 @@ def create_enhanced_visualization(df, column_name, analysis, key_suffix=""):
             yaxis=dict(title="Count", showgrid=True, gridwidth=1, gridcolor='rgba(211,211,211,0.3)')
         )
         
-        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False}, 
+                       key=f"time_{column_name}_{key_suffix}")
         
         # Show time period statistics
         time_stats_cols = st.columns(3)
@@ -525,7 +530,7 @@ def create_enhanced_visualization(df, column_name, analysis, key_suffix=""):
                 pair_col = st.selectbox(
                     f"Select variable to plot against {column_name}:",
                     numeric_cols,
-                    key=f"scatter_{key_suffix}"
+                    key=f"scatter_select_{key_suffix}"
                 )
             
             # Create enhanced scatter plot
@@ -546,7 +551,8 @@ def create_enhanced_visualization(df, column_name, analysis, key_suffix=""):
                 yaxis=dict(title=pair_col, showgrid=True, gridcolor='rgba(211,211,211,0.3)')
             )
             
-            st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+            st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False}, 
+                          key=f"scatter_{column_name}_{pair_col}_{key_suffix}")
             
             # Calculate correlation
             corr = df[[column_name, pair_col]].corr().iloc[0, 1]
@@ -567,7 +573,8 @@ def create_enhanced_visualization(df, column_name, analysis, key_suffix=""):
                 title=f'<b>Distribution of {column_name}</b>',
                 color_discrete_sequence=['#4e8df5']
             )
-            st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+            st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False}, 
+                          key=f"fallback_hist_{column_name}_{key_suffix}")
     
     elif analysis["viz_type"] == "map":
         st.write(f"Map visualization for {column_name} would be shown here. This requires geospatial data processing.")
@@ -599,7 +606,8 @@ def create_enhanced_visualization(df, column_name, analysis, key_suffix=""):
             yaxis=dict(title="Count", showgrid=True, gridwidth=1, gridcolor='rgba(211,211,211,0.3)')
         )
         
-        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False}, 
+                       key=f"map_{column_name}_{key_suffix}")
     
     elif analysis["viz_type"] == "word_cloud":
         st.write(f"Word cloud visualization for {column_name} would be shown here.")
@@ -624,7 +632,8 @@ def create_enhanced_visualization(df, column_name, analysis, key_suffix=""):
             yaxis=dict(title="Count", showgrid=True, gridwidth=1, gridcolor='rgba(211,211,211,0.3)')
         )
         
-        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False}, 
+                       key=f"wordcloud_{column_name}_{key_suffix}")
     
     elif analysis["viz_type"] == "table":
         # Show top values and their counts in a styled table
@@ -659,7 +668,8 @@ def create_enhanced_correlation_heatmap(df):
             font=dict(family="Arial, sans-serif")
         )
         
-        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False}, 
+                       key="correlation_heatmap")
         
         # Find and display strongest correlations
         corr_pairs = []
@@ -749,6 +759,9 @@ def create_enhanced_recommendation(df, recommendation):
     viz_type = recommendation["type"]
     columns = recommendation["columns"]
     
+    # Generate a unique key for this recommendation
+    rec_key = f"rec_{viz_type}_{'_'.join(columns)}"
+    
     if viz_type == "grouped_bar":
         num_col, cat_col = columns
         
@@ -792,7 +805,7 @@ def create_enhanced_recommendation(df, recommendation):
             title=dict(font=dict(size=16, family="Arial, sans-serif", color="#2e4057"))
         )
         
-        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False}, key=rec_key)
         
         with st.expander("See detailed data"):
             st.dataframe(grouped_data.style.format({'Mean': '{:.2f}', 'StdDev': '{:.2f}'}), use_container_width=True)
@@ -916,7 +929,7 @@ def create_enhanced_recommendation(df, recommendation):
             )
         )
         
-        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False}, key=rec_key)
         
         # Show key insights
         insights_cols = st.columns(len(categories) if len(categories) <= 3 else 3)
@@ -966,7 +979,7 @@ def create_enhanced_recommendation(df, recommendation):
             height=600 if len(columns) > 2 else 500,
         )
         
-        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False}, key=rec_key)
         
         # Show correlation matrix as table
         st.markdown("<div class='section-header'>Correlation Matrix</div>", unsafe_allow_html=True)
@@ -1222,7 +1235,8 @@ def create_key_metrics(df, column_analyses):
                 )]
             )
             
-            st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+            st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False}, 
+                           key=f"key_metric_{selected_cat_col}")
 
 # Main app logic
 def main():
@@ -1531,7 +1545,7 @@ def main():
                     
                     with explorer_cols[1]:
                         # If a column is selected, show its visualization and details
-                        if selected_column:
+                        if 'selected_column' in locals() and selected_column:
                             st.markdown("<div class='card'>", unsafe_allow_html=True)
                             analysis = column_analyses[selected_column]
                             
