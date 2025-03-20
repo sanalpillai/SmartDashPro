@@ -7,6 +7,52 @@ import importlib.util
 import os
 import uuid
 
+# Define color schemes for each theme
+theme_colors = {
+    "Default": {
+        "primary": "#4e8df5",
+        "secondary": "#f5f7f9",
+        "text": "#2e4057",
+        "chart_colors": px.colors.qualitative.Plotly,
+        "gradient": px.colors.sequential.Blues
+    },
+    "Blue": {
+        "primary": "#1f77b4",
+        "secondary": "#e6f2ff",
+        "text": "#0d3c61",
+        "chart_colors": px.colors.sequential.Blues,
+        "gradient": px.colors.sequential.Blues
+    },
+    "Green": {
+        "primary": "#2ca02c",
+        "secondary": "#e6f7e6",
+        "text": "#0d610d",
+        "chart_colors": px.colors.sequential.Greens,
+        "gradient": px.colors.sequential.Greens
+    },
+    "Red": {
+        "primary": "#d62728",
+        "secondary": "#ffe6e6",
+        "text": "#61130d",
+        "chart_colors": px.colors.sequential.Reds,
+        "gradient": px.colors.sequential.Reds
+    },
+    "Purple": {
+        "primary": "#9467bd",
+        "secondary": "#f0e6ff",
+        "text": "#3e1461",
+        "chart_colors": px.colors.sequential.Purples,
+        "gradient": px.colors.sequential.Purples
+    },
+    "Dark": {
+        "primary": "#1e1e1e",
+        "secondary": "#2e2e2e",
+        "text": "#ffffff",
+        "chart_colors": px.colors.qualitative.Dark24,
+        "gradient": px.colors.sequential.Greys_r
+    }
+}
+
 # Set page configuration
 st.set_page_config(
     page_title="Smart Data Dashboard",
@@ -260,8 +306,22 @@ def analyze_column(df, column_name):
     }
 
 # Function to create enhanced visualizations based on column analysis
-def create_enhanced_visualization(df, column_name, analysis, key_suffix=""):
-    """Creates a better styled visualization based on column analysis"""
+# Function signature:
+def create_enhanced_visualization(df, column_name, analysis, key_suffix="", theme=None):
+    # Use default theme if none provided
+    if theme is None:
+        theme = theme_colors["Default"]
+    
+    # Then update color references in your charts, for example:
+    fig = px.bar(
+        value_counts, 
+        x=column_name, 
+        y='Count',
+        title=title,
+        text='Count',
+        color_discrete_sequence=[theme['primary']],  # Use theme color
+        opacity=0.8
+    )
     
     if analysis["viz_type"] == "none":
         st.write(f"No visualization available for empty column: {column_name}")
@@ -1248,8 +1308,33 @@ def main():
         
         # Theme selection
         st.markdown("<div style='margin-top: 20px;'><b>Visual Theme</b></div>", unsafe_allow_html=True)
-        theme_options = ["Default", "Blue", "Green", "Red", "Purple", "Dark"]
-        selected_theme = st.selectbox("Select color theme:", theme_options, label_visibility="collapsed")
+        selected_theme = st.selectbox("Select color theme:", list(theme_colors.keys()), label_visibility="collapsed")
+        current_theme = theme_colors[selected_theme]
+        
+        # Apply theme through CSS
+        theme_css = f"""
+        <style>
+            .main {{
+                background-color: {current_theme['secondary']};
+            }}
+            .stTabs [aria-selected="true"] {{
+                background-color: {current_theme['primary']};
+            }}
+            h1, h2, h3 {{
+                color: {current_theme['text']};
+            }}
+            .metric-value {{
+                color: {current_theme['primary']};
+            }}
+            .card {{
+                border: 1px solid {current_theme['secondary']};
+            }}
+            .recommendation-card {{
+                border-left: 4px solid {current_theme['primary']};
+            }}
+        </style>
+        """
+        st.markdown(theme_css, unsafe_allow_html=True)
         
         # Auto refresh toggle
         st.markdown("<div style='margin-top: 20px;'><b>Auto-Refresh</b></div>", unsafe_allow_html=True)
@@ -1453,7 +1538,7 @@ def main():
                         with viz_columns[i % 2]:
                             st.markdown(f"<div class='card'>", unsafe_allow_html=True)
                             analysis = column_analyses[column_name]
-                            create_enhanced_visualization(df, column_name, analysis, key_suffix=f"main_{i}")
+                            create_enhanced_visualization(df, column_name, analysis, key_suffix=f"main_{i}", theme=current_theme)
                             st.markdown("</div>", unsafe_allow_html=True)
                     
                     # Get recommendations
@@ -1491,7 +1576,7 @@ def main():
                         for i, recommendation in enumerate(recommendations[:6]):  # Limit to 6 recommendations
                             # Create a unique key for each recommendation
                             rec_id = f"rec_{i}_{uuid.uuid4().hex[:6]}"
-                            create_enhanced_recommendation(df, recommendation, key_id=rec_id)
+                            create_enhanced_recommendation(df, recommendation, key_id=f"main_insight_{uuid.uuid4().hex[:8]}", theme=current_theme)
                             st.markdown("<div class='card'>", unsafe_allow_html=True)
                             st.markdown(f"""
                             <div class='recommendation-card'>
