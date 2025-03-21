@@ -45,7 +45,12 @@ from plotly.subplots import make_subplots
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import seaborn as sns
-from wordcloud import WordCloud
+WORDCLOUD_AVAILABLE = False
+try:
+    from wordcloud import WordCloud
+    WORDCLOUD_AVAILABLE = True
+except ImportError:
+    pass
 
 # Set page configuration with custom theme
 st.set_page_config(
