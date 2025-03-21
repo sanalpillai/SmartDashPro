@@ -3340,7 +3340,7 @@ def create_recommended_visualization(df, recommendation, container=None, key_id=
                     marker_color=colors[i % len(colors)],
                     line_color='white',
                     opacity=0.6,
-                    side='positive',  # All violins on positive side
+                    side='right',  # All violins on positive side
                     points=False,  # Don't show individual points
                     jitter=0,
                     bandwidth=None,  # Let plotly determine optimal bandwidth
