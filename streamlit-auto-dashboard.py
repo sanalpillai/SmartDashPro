@@ -2163,7 +2163,7 @@ def create_enhanced_data_quality(df, column_analyses, container=None):
             
             <div style="flex: 1; text-align: center;">
                 <h4>Consistency</h4>
-                <div style="font-size: 1.5rem; font-weight: 500; color: {consistency_score >= 90 and '#2ecc71' or consistency_score >= 70 and '#f39c12 or '#e74c3c'};">
+                <div style="font-size: 1.5rem; font-weight: 500; color: {consistency_score >= 90 and '#2ecc71' or consistency_score >= 70 and '#f39c12' or '#e74c3c'};">
                     {consistency_score:.1f}%
                 </div>
             </div>
