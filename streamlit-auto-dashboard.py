@@ -1,3 +1,36 @@
+import subprocess
+import sys
+import os
+
+def install_required_packages():
+    """Checks and installs required packages from requirements.txt."""
+    try:
+        # Check if requirements.txt exists
+        if os.path.exists('requirements.txt'):
+            print("Installing required packages from requirements.txt...")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+            print("Installation complete!")
+        else:
+            print("requirements.txt not found. Installing core dependencies...")
+            subprocess.check_call([
+                sys.executable, "-m", "pip", "install",
+                "streamlit==1.32.0",
+                "pandas==2.2.0",
+                "numpy==1.26.4",
+                "plotly==5.20.0",
+                "scipy==1.12.0",
+                "matplotlib==3.8.3",
+                "seaborn==0.13.1",
+                "wordcloud==1.9.2"
+            ])
+            print("Core dependencies installed!")
+    except Exception as e:
+        print(f"Error installing packages: {e}")
+
+# Call the function to install packages
+install_required_packages()
+
+# Now import the required packages
 import streamlit as st
 import pandas as pd
 import numpy as np
