@@ -1,5 +1,3 @@
-pip install pandas numpy plotly matplotlib seaborn wordcloud
-
 import streamlit as st
 import pandas as pd
 import numpy as np
