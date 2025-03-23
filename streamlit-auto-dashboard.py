@@ -1703,7 +1703,7 @@ def main():
                 </div>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)  # Added the missing parameter here
 
 if __name__ == "__main__":
     main()
