@@ -7,6 +7,8 @@ import importlib.util
 import os
 import uuid
 
+st.cache_data.clear()  # Clear the cache
+
 # Set page configuration
 st.set_page_config(
     page_title="Smart Data Dashboard",
