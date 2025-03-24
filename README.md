@@ -4,6 +4,8 @@
 
 SmartDashPro is an intelligent data dashboard that automatically analyzes your data and generates beautiful, insightful visualizations with zero configuration required. Simply upload your CSV or Excel file and get an auto-generated dashboard tailored to your data.
 
+App Link: https://smartdashpro.streamlit.app/
+
 ## 🌟 Features
 
 ### ⚡ Automatic Data Intelligence
