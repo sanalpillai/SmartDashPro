@@ -1627,7 +1627,7 @@ def main():
                 st.error(f"Error processing file: {str(e)}")
                 st.exception(e)
     else:
-        # Show welcome message
+        # Show welcome message with proper triple quote termination and unsafe_allow_html parameter
         st.markdown("""
         <div style="text-align: center; padding: 40px 20px; background-color: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin: 20px 0;">
             <img src="https://cdn-icons-png.flaticon.com/512/6295/6295417.png" width="100">
@@ -1656,7 +1656,7 @@ def main():
         </div>
         """, unsafe_allow_html=True)
         
-        # Display feature highlights
+        # Display feature highlights - make sure triple quotes are properly terminated
         st.markdown("""
         <div style="margin-top: 40px;">
             <h3 style="text-align: center; margin-bottom: 30px;">Features</h3>
@@ -1705,7 +1705,7 @@ def main():
                 </div>
             </div>
         </div>
-        """, unsafe_allow_html=True)  # Added the missing parameter here
+        """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
