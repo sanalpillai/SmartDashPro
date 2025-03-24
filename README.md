@@ -51,6 +51,18 @@ SmartDashPro is an intelligent data dashboard that automatically analyzes your d
    - Outlier identification
    - Column-level statistics
 
+## Screenshots
+
+<img width="1508" alt="Screenshot 2025-03-23 at 8 19 03 PM" src="https://github.com/user-attachments/assets/f8fd71c5-a8de-4529-9aa1-b5af9d4dae11" />
+<img width="1508" alt="Screenshot 2025-03-23 at 8 19 19 PM" src="https://github.com/user-attachments/assets/e0e48dcd-f1cf-482b-8c47-c4ccc2c3b83f" />
+<img width="1508" alt="Screenshot 2025-03-23 at 8 19 34 PM" src="https://github.com/user-attachments/assets/61e4caf1-5664-43ed-91d3-45d3bb4ba031" />
+<img width="1508" alt="Screenshot 2025-03-23 at 8 19 51 PM" src="https://github.com/user-attachments/assets/b5db59c8-2d53-4fd2-9fbb-4da867ad6473" />
+<img width="1508" alt="Screenshot 2025-03-23 at 8 20 10 PM" src="https://github.com/user-attachments/assets/2ec6b3e3-acad-4db2-8055-9257ce61820a" />
+<img width="1508" alt="Screenshot 2025-03-23 at 8 20 23 PM" src="https://github.com/user-attachments/assets/068a1166-230c-447d-9d9e-07a86a4fd65b" />
+<img width="1508" alt="Screenshot 2025-03-23 at 8 20 36 PM" src="https://github.com/user-attachments/assets/20a082fa-da38-4f0d-a1c7-5b6467fbc9c0" />
+
+
+
 ## 🚀 Getting Started
 
 ### Prerequisites
