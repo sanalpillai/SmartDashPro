@@ -1,6 +1,6 @@
 # SmartDashPro
 
-![SmartDashPro Logo](https://cdn-icons-png.flaticon.com/512/6295/6295417.png)
+<img src="https://cdn-icons-png.flaticon.com/512/6295/6295417.png" width="64" height="64">
 
 SmartDashPro is an intelligent data dashboard that automatically analyzes your data and generates beautiful, insightful visualizations with zero configuration required. Simply upload your CSV or Excel file and get an auto-generated dashboard tailored to your data.
 
@@ -53,6 +53,10 @@ SmartDashPro is an intelligent data dashboard that automatically analyzes your d
 
 ## Screenshots
 
+![Smartdash-vid-gif](https://github.com/user-attachments/assets/cc1d3f4c-4941-4b9f-9193-a320c1c64238)
+
+<img width="1508" alt="Screenshot 2025-03-23 at 8 26 12 PM" src="https://github.com/user-attachments/assets/76940d45-e19b-442a-9b4c-82631ae05f33" />
+<img width="1508" alt="Screenshot 2025-03-23 at 8 26 28 PM" src="https://github.com/user-attachments/assets/39f00823-bbe0-435c-8929-2812708ed8fe" />
 <img width="1508" alt="Screenshot 2025-03-23 at 8 19 03 PM" src="https://github.com/user-attachments/assets/f8fd71c5-a8de-4529-9aa1-b5af9d4dae11" />
 <img width="1508" alt="Screenshot 2025-03-23 at 8 19 19 PM" src="https://github.com/user-attachments/assets/e0e48dcd-f1cf-482b-8c47-c4ccc2c3b83f" />
 <img width="1508" alt="Screenshot 2025-03-23 at 8 19 34 PM" src="https://github.com/user-attachments/assets/61e4caf1-5664-43ed-91d3-45d3bb4ba031" />
