@@ -1,4 +1,4 @@
-# SmartDashPro
+# SmartDashPro - Intelligent Data Visualization Dashboard 
 
 <img src="https://cdn-icons-png.flaticon.com/512/6295/6295417.png" width="64" height="64">
 
